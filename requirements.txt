@@ -1,0 +1,7 @@
+requests==2.31.0
+sentence-transformers==2.5.1
+faiss-cpu
+numpy
+google-api-python-client
+google-auth-httplib2
+google-auth-oauthlib

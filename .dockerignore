@@ -1,0 +1,4 @@
+__pycache__/
+*.db
+*.bin
+token.json
