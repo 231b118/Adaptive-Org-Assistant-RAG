@@ -8,7 +8,11 @@ FAISS_INDEX_PATH = os.path.join(BASE_DIR, "faiss_index.bin")
 OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://localhost:11434")
 OLLAMA_URL = f"{OLLAMA_HOST}/api/generate"
 
-# Google API Scopes (Read-only access to Gmail)
-SCOPES = ['https://www.googleapis.com/auth/gmail.readonly']
+
+SCOPES = SCOPES = [
+    'https://www.googleapis.com/auth/gmail.readonly',
+    'https://www.googleapis.com/auth/calendar'
+]
+
 CREDENTIALS_PATH = os.path.join(BASE_DIR, "credentials.json")
 TOKEN_PATH = os.path.join(BASE_DIR, "token.json")

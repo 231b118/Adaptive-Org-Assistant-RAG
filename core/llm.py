@@ -7,7 +7,8 @@ def query_mistral(question, context):
     You are an intelligent organizational assistant.
     Use ONLY the following context to answer the user's question. 
     If the answer is not in the context, state that you do not have that data.
-
+    Note: All emails come from a shared team account. To identify the sender, ignore the 'From:' field and instead look at the Signature (e.g., - Taylor) or infer the sender by looking at who they are addressing (e.g., if it says 'Hey Sarah,' the sender is likely Marcus or Taylor).
+    
     Context:
     {context}
 
@@ -17,27 +18,26 @@ def query_mistral(question, context):
     """
 
     payload = {
-        "model": "llama3.2:1b",  
+        "model": "llama3.2:3b",  
         "prompt": prompt,
-        "stream": True  
+        "stream": False  # 🟢 SET TO FALSE for a simpler Streamlit integration
     }
 
     try:
-        # We also tell the requests library to stream the connection
-        response = requests.post(OLLAMA_URL, json=payload, stream=True)
+        response = requests.post(OLLAMA_URL, json=payload)
         response.raise_for_status()
-
-        print("\n🤖 Assistant Response:")
         
-        # This loop prints each word exactly as the AI thinks of it
-        for line in response.iter_lines():
-            if line:
-                chunk = json.loads(line)
-                word = chunk.get('response', '')
-                # Print without adding a new line, and force it to the screen instantly
-                print(word, end='', flush=True) 
-                
-        print("\n" + "="*40)
+        # 🟢 Extract the full response text
+        result = response.json()
+        full_response = result.get('response', '')
+        
+        # We can still keep the print for your terminal debugging
+        print("\n🤖 Assistant Response (Terminal):")
+        print(full_response)
+        
+        return full_response
         
     except requests.exceptions.RequestException as e:
-        print(f"Error communicating with local LLM: {e}")
+        error_msg = f"Error communicating with local LLM: {e}"
+        print(error_msg)
+        return error_msg

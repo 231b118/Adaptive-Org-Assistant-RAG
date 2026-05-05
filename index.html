@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Enterprise Org Assistant</title>
+    <style>
+        body { font-family: sans-serif; background: #121212; color: white; padding: 20px; }
+        #chat-container { max-width: 800px; margin: auto; }
+        .box { background: #1e1e1e; padding: 15px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #333; }
+        input { width: 80%; padding: 10px; border-radius: 4px; border: none; }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        #response { white-space: pre-wrap; color: #add8e6; }
+        #source-box { font-size: 0.8em; color: #888; }
+    </style>
+</head>
+<body>
+    <div id="chat-container">
+        <h2>🤖 Enterprise Org Assistant</h2>
+        <div class="box">
+            <input type="text" id="question" placeholder="Ask a question about your workspace...">
+            <button onclick="askAssistant()">Ask</button>
+        </div>
+        <div id="loading" style="display:none;">Thinking...</div>
+        <div class="box" id="result-box" style="display:none;">
+            <strong>Assistant:</strong>
+            <p id="response"></p>
+            <hr>
+            <div id="source-box"><strong>Sources:</strong> <div id="sources"></div></div>
+        </div>
+    </div>
+
+    <script>
+        async function askAssistant() {
+            const question = document.getElementById('question').value;
+            const loading = document.getElementById('loading');
+            const resultBox = document.getElementById('result-box');
+            
+            loading.style.display = 'block';
+            resultBox.style.display = 'none';
+
+            try {
+                const res = await fetch('http://localhost:5000/ask', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ question })
+                });
+                const data = await res.json();
+
+                document.getElementById('response').innerText = data.answer;
+                document.getElementById('sources').innerText = data.context;
+                resultBox.style.display = 'block';
+            } catch (err) {
+                alert("Error connecting to server. Is server.py running?");
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

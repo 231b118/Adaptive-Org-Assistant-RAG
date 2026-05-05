@@ -1,32 +1,47 @@
-from core.ingestion import fetch_live_emails
+from core.ingestion import get_credentials, fetch_live_emails, fetch_calendar_events
 from core.database import VectorStore
 from core.llm import query_mistral
 
-def main():
-    print("Starting Enterprise Org Assistant...")
 
-    print("Authenticating with Google Workspace...")
-    docs, metadata = fetch_live_emails(max_results=15)
-    
-    if not docs:
-        print("Exiting: No data pulled from API.")
-        return
+print("Starting Enterprise Org Assistant...")
+db = VectorStore()
+existing_ids = db.get_existing_sources()
+print(f"Found {len(existing_ids)} existing records in the local database.")
 
-    print(f"Successfully pulled {len(docs)} live records.")
+print("Authenticating with Google Workspace...")
+creds = get_credentials()
 
-    db = VectorStore()
-    print("Building vector and relational databases...")
-    db.build_and_save(docs, metadata)
+print("\n--- Fetching Data ---")
+email_docs, email_meta = fetch_live_emails(creds, max_results=50, ignore_ids=existing_ids)
+cal_docs, cal_meta = fetch_calendar_events(creds, max_results=20, ignore_ids=existing_ids)
     
-    question = "Who is overloaded this week and why?"
-    print(f"\nUser Question: {question}")
+all_docs = email_docs + cal_docs
+all_meta = email_meta + cal_meta
+
+if all_docs:
+    print(f"\nSuccessfully pulled {len(all_docs)} NEW records ({len(email_docs)} Emails, {len(cal_docs)} Meetings).")
+    print("Appending to vector and relational databases...")
+    db.append_documents(all_docs, all_meta)
+else:
+    print("\nNo new data found. Database is up to date.")
+
+question = "What caused the S3 403 Forbidden error, and who fixed it?"
+print(f"\nUser Question: {question}")
     
-    print("Searching databases for context...")
-    relevant_context = db.search(question)
+print("Searching databases for context...")
+try:
+    relevant_context = db.search(question, top_k=10) 
     context_str = "\n".join([f"- {text}" for text in relevant_context])
-
-    print("Sending context to local AI...")
-    query_mistral(question, context_str)
-
-if __name__ == "__main__":
-    main()
+        
+    if not context_str.strip():
+        print("No relevant context found in the database to answer this.")
+    else:
+        print("\n--- WHAT THE AI IS READING ---")
+        print(context_str)
+        print("------------------------------\n")
+            
+        print("Sending context to local AI...")
+        query_mistral(question, context_str)
+            
+except ValueError as e:
+    print(f"Database Error: {e}")
