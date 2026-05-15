@@ -28,7 +28,43 @@ This project was specifically optimized to run complex LLMs locally on consumer-
 * A system with at least 8GB RAM (A dedicated GPU with 6GB+ VRAM like an RTX 3050 is highly recommended for optimal speed).
 
 ### 2. Installation
-1. **Clone the repository:**
-   ```bash
-   git clone [https://github.com/231b118/Adaptive-Org-Assistant-RAG.git](https://github.com/231b118/Adaptive-Org-Assistant-RAG.git)
+
+**i. Clone the repository:**
+ ```bash
+   git clone https://github.com/231b118/Adaptive-Org-Assistant-RAG.git
    cd Adaptive-Org-Assistant-RAG
+   ```
+   Set up a Python Virtual Environment :
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows use: venv\Scripts\activate
+   ```
+**ii. Install Required Dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   ```
+   Otherwise, install the packages manually:
+   ```bash
+   pip install flask flask-cors sentence-transformers faiss-cpu numpy requests
+   ```
+   (Note: If you have an NVIDIA GPU and CUDA installed, you can install faiss-gpu instead of faiss-cpu for significantly       faster vector searches).
+
+**iii. Download the Local LLM:**
+* Make sure the Ollama application is running on your machine, then open a terminal and pull the 3B model:
+
+   ```bash
+   ollama pull llama3.2
+   ```
+
+**iv. Running the Application:**
+*  Step 1: Start the Backend Server
+   Keep Ollama running in the background. Open a terminal in your project folder and start the Flask API:
+
+   ```bash
+   python server.py
+   ```
+   (The server should now be listening on http://localhost:5000)
+
+*  Step 2: Launch the Interface
+   Simply open the index.html file in your preferred web browser.
+   (For the best experience, use a local development server like the "Live Server" extension in VS Code).
